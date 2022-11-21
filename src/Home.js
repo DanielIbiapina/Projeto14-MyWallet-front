@@ -8,6 +8,10 @@ import axios from 'axios';
 export default function Home() {
     const { entrada, setEntrada, corSelecionado, setCorSelecionado  } = useContext(Contexto);
     const [registros, setRegistros] = useState([])
+    let saldo = []
+    let sum = 0
+    const [soma, setSoma] = useState(0)
+    
 
     function atualizarRegistros(dadosSerializados) {
         console.log(dadosSerializados)
@@ -15,9 +19,28 @@ export default function Home() {
         console.log(lista)
         const novoArray = [...registros, lista]
         setRegistros(novoArray)
-
+        
     }
-
+    function somarSaldo(dadosSerializados){
+        const lista = JSON.parse(dadosSerializados);
+        
+        lista.map((registro) => {
+            console.log(registro.valor)
+            if (registro.positivo == 'positivo'){
+                saldo.push(Number(registro.valor))
+            } else {
+                saldo.push((-1)* Number(registro.valor) )
+            }
+            
+           
+        })
+        
+        for(let i=0; i<saldo.length; i++){
+            sum = sum + saldo[i] 
+           }
+           setSoma(sum)
+    }
+    
     console.log(entrada)
 
     useEffect(() => {
@@ -29,6 +52,9 @@ export default function Home() {
             console.log('registros resgatados')
             console.log(dadosSerializados)
             atualizarRegistros(dadosSerializados);
+            somarSaldo(dadosSerializados);
+            console.log(saldo)
+            console.log(sum)
         });
     }, []);
 
@@ -37,7 +63,7 @@ export default function Home() {
     }
 
     console.log(registros)
-
+    
 
 
     return (
@@ -47,6 +73,7 @@ export default function Home() {
                 icon
             </Header>
             <Registros>
+                <div>
                 {registros[0].map((registro, key) => {
                     return (
 
@@ -55,12 +82,17 @@ export default function Home() {
                             <div>
                             <RegistroTexto> {registro.descricao} </RegistroTexto>
                             </div>
-                            <RegistroPreço cor = {entrada ? '#03AC00' : "#C70000"}> R$ {registro.valor} </RegistroPreço>
+                            <RegistroPreço cor = {registro.positivo == 'positivo' ? '#03AC00' : "#C70000"}> R$ {registro.valor} </RegistroPreço>
                         </ContainerRegistro>
 
                     )
                 }
                 )}
+                </div>
+                <ContainerSaldo cor = {soma > 0 ? '#03AC00' : "#C70000"}>
+                    <p>SALDO</p>
+                    <h1  >{soma} </h1>
+                </ContainerSaldo>
             </Registros>
             <Footer>
                 <Link to={"/transferencia"}>
@@ -122,6 +154,7 @@ padding-top: 17px;
 display: flex;
 flex-direction: column;
 align-items: center;
+justify-content: space-between;
 `
 const ContainerRegistro = styled.div`
 width: 300px;
@@ -136,7 +169,26 @@ color: #000000;
 display: flex;
 justify-content: space-between;
 align-items: center;
+background-color: blue;
 
+`
+const ContainerSaldo = styled.div`
+width: 300px;
+height: 35px;
+margin-bottom: 4px;
+font-family: 'Raleway';
+font-style: normal;
+font-weight: 400;
+font-size: 16px;
+line-height: 19px;
+color: #000000;
+display: flex;
+justify-content: space-between;
+align-items: center;
+background-color: blue;
+h1{
+    color: ${props => props.cor};
+}
 `
 const RegistroDia = styled.div`
 

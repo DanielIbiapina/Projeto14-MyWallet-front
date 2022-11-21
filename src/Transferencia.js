@@ -5,10 +5,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import Contexto from "./Contexto.js"
+import dayjs from 'dayjs';
 
 
 export default function Transferencia() {
-
     const [valor, setValor] = useState('')
     const [descricao, setDescricao] = useState('')
     const [loading, setLoading] = useState(false)
@@ -20,10 +20,13 @@ export default function Transferencia() {
     function fazerTransferencia(event) {
         event.preventDefault();
         setLoading(true)
+    
         const requisicao = axios.post("http://localhost:5000/operacao", {
             valor: valor,
-            descricao: descricao
+            descricao: descricao,
+            positivo: entrada ? 'positivo' : 'negativo'
         })
+    
 
         requisicao.then(resposta => {
             setLoading(false)
@@ -32,11 +35,7 @@ export default function Transferencia() {
             const dadosSerializados = JSON.stringify(dados)
             localStorage.setItem("listavalor", dadosSerializados);
             console.log(resposta.data)
-            if(entrada == true){
-        
-                const novoArray = [...corSelecionado, dados[0].time]
-                setCorSelecionado(novoArray)
-            }
+            
             navigate("/home")
 
         });
