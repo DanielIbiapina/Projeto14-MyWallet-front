@@ -29,7 +29,7 @@ console.log(token)
        <Contexto.Provider value={{token, setToken, setAndPersistToken, entrada, setEntrada, corSelecionado, setCorSelecionado}}>
         <BrowserRouter>
             <Routes>
-            <Route path="/"  element= {<Home/>} />
+            <Route path="/"  element= {<Login/>} />
             <Route path="/cadastro" element={<Cadastro/>} />
             <Route path="/home" element={<Home/>} />
             <Route path="/transferencia" element={<Transferencia/>} />

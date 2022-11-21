@@ -6,12 +6,14 @@ import axios from 'axios';
 
 
 export default function Home() {
-    const { entrada, setEntrada, corSelecionado, setCorSelecionado  } = useContext(Contexto);
+    const { entrada, setEntrada, corSelecionado, setCorSelecionado, token  } = useContext(Contexto);
+    const tokenOnLocalStorage = localStorage.getItem("token");
     const [registros, setRegistros] = useState([])
+    const [pessoa, setPessoa] = useState('')
     let saldo = []
     let sum = 0
     const [soma, setSoma] = useState(0)
-    
+    console.log(token)
 
     function atualizarRegistros(dadosSerializados) {
         console.log(dadosSerializados)
@@ -43,7 +45,28 @@ export default function Home() {
     
     console.log(entrada)
 
+
+
+    
+    const config = {
+       headers: {
+            Authorization: `Bearer ${ tokenOnLocalStorage }`,
+        },
+    };
+
     useEffect(() => {
+        
+        const promises = axios.get(`http://localhost:5000/meus-dados`, config)
+        promises.then(resposta => {
+            const dadoss = resposta.data
+            const dadosSerializadoss = JSON.stringify(dadoss)
+            console.log('registros resgatados')
+            console.log(dadoss)
+            console.log(dadosSerializadoss)
+            setPessoa(dadoss.name)
+            
+            
+        });
 
         const promise = axios.get(`http://localhost:5000/registros`)
         promise.then(resposta => {
@@ -64,19 +87,22 @@ export default function Home() {
 
     console.log(registros)
     
+    
 
 
     return (
         <BodyHome>
             <Header>
-                <p>Olá, Fulano</p>
+                <p>Olá, {pessoa}</p>
                 icon
             </Header>
             <Registros>
                 <div>
-                {registros[0].map((registro, key) => {
+                {registros[0].length != 0
+                ?
+                registros[0].map((registro, key) => {
                     return (
-
+                        
                         <ContainerRegistro>
                             <RegistroDia> {registro.time} </RegistroDia>
                             <div>
@@ -87,11 +113,16 @@ export default function Home() {
 
                     )
                 }
-                )}
+                )
+                :
+                "Não há registros de entrada ou saída"
+
+                }
+                
                 </div>
                 <ContainerSaldo cor = {soma > 0 ? '#03AC00' : "#C70000"}>
                     <p>SALDO</p>
-                    <h1  >{soma} </h1>
+                    <h1>R${soma} </h1>
                 </ContainerSaldo>
             </Registros>
             <Footer>
@@ -169,7 +200,6 @@ color: #000000;
 display: flex;
 justify-content: space-between;
 align-items: center;
-background-color: blue;
 
 `
 const ContainerSaldo = styled.div`
@@ -185,7 +215,9 @@ color: #000000;
 display: flex;
 justify-content: space-between;
 align-items: center;
-background-color: blue;
+p{
+    font-weight: 800;
+}
 h1{
     color: ${props => props.cor};
 }

@@ -12,7 +12,15 @@ export default function Transferencia() {
     const [valor, setValor] = useState('')
     const [descricao, setDescricao] = useState('')
     const [loading, setLoading] = useState(false)
-    const { entrada, setEntrada, corSelecionado, setCorSelecionado } = useContext(Contexto);
+    const { entrada, setEntrada, corSelecionado, setCorSelecionado, token} = useContext(Contexto);
+    const tokenOnLocalStorage = localStorage.getItem("token");
+    console.log(tokenOnLocalStorage)
+
+    const config = {
+        headers: {
+             Authorization: `Bearer ${tokenOnLocalStorage}`,
+         },
+     };
    
     const navigate = useNavigate()
     console.log(entrada)
@@ -25,7 +33,7 @@ export default function Transferencia() {
             valor: valor,
             descricao: descricao,
             positivo: entrada ? 'positivo' : 'negativo'
-        })
+        }, config)
     
 
         requisicao.then(resposta => {

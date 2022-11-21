@@ -18,7 +18,12 @@ export default function Cadastro() {
     function fazerCadastro(event) {
         event.preventDefault();
         setLoading(true)
-        const requisicao = axios.post("https://mock-api.driven.com.br/api/v4/driven-plus/auth/sign-up", {
+        if(senha !== confirme){
+            setLoading(false)
+            alert('As senhas estão diferentes')
+            return
+        }
+        const requisicao = axios.post("http://localhost:5000/sign-up", {
             name: nome,
             email: email,
             confirme: confirme,
@@ -27,7 +32,7 @@ export default function Cadastro() {
 
         requisicao.then(resposta => {
             setLoading(false)
-            alert('oi, deu certo')
+            alert('Parabéns. usuário criado!')
             console.log(resposta.data)
             navigate("/")
         });

@@ -19,7 +19,7 @@ export default function Login() {
     function fazerLogin(event) {
         event.preventDefault();
         setLoading(true)
-        const requisicao = axios.post("https://mock-api.driven.com.br/api/v4/driven-plus/auth/login", {
+        const requisicao = axios.post("http://localhost:5000/sign-in", {
             email: email,
             password: senha
         })
@@ -35,7 +35,8 @@ export default function Login() {
             console.log(resposta.data)
             //if(resposta.data.membership == null){
             //    navigate("/subscriptions")
-            //} else navigate("/home")
+            
+            navigate("/home")
 
         });
 
