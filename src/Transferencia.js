@@ -12,14 +12,15 @@ export default function Transferencia() {
     const [valor, setValor] = useState('')
     const [descricao, setDescricao] = useState('')
     const [loading, setLoading] = useState(false)
-    const { entrada, setEntrada } = useContext(Contexto);
+    const { entrada, setEntrada, corSelecionado, setCorSelecionado } = useContext(Contexto);
+   
     const navigate = useNavigate()
     console.log(entrada)
 
     function fazerTransferencia(event) {
         event.preventDefault();
         setLoading(true)
-        const requisicao = axios.post("https://mock-api.driven.com.br/api/v4/driven-plus/auth/login", {
+        const requisicao = axios.post("http://localhost:5000/operacao", {
             valor: valor,
             descricao: descricao
         })
@@ -31,6 +32,11 @@ export default function Transferencia() {
             const dadosSerializados = JSON.stringify(dados)
             localStorage.setItem("listavalor", dadosSerializados);
             console.log(resposta.data)
+            if(entrada == true){
+        
+                const novoArray = [...corSelecionado, dados[0].time]
+                setCorSelecionado(novoArray)
+            }
             navigate("/home")
 
         });
@@ -40,6 +46,7 @@ export default function Transferencia() {
             setLoading(false)
             console.log(erro.response.data);
         });
+    
 
     }
 

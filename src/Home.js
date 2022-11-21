@@ -1,12 +1,45 @@
 import styled from 'styled-components'
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Contexto from "./Contexto.js"
-import { useContext } from "react";
+import axios from 'axios';
+
 
 export default function Home() {
-    const {  entrada, setEntrada } = useContext(Contexto);
+    const { entrada, setEntrada, corSelecionado, setCorSelecionado  } = useContext(Contexto);
+    const [registros, setRegistros] = useState([])
+
+    function atualizarRegistros(dadosSerializados) {
+        console.log(dadosSerializados)
+        const lista = JSON.parse(dadosSerializados);
+        console.log(lista)
+        const novoArray = [...registros, lista]
+        setRegistros(novoArray)
+
+    }
+
     console.log(entrada)
+
+    useEffect(() => {
+
+        const promise = axios.get(`http://localhost:5000/registros`)
+        promise.then(resposta => {
+            const dados = resposta.data
+            const dadosSerializados = JSON.stringify(dados)
+            console.log('registros resgatados')
+            console.log(dadosSerializados)
+            atualizarRegistros(dadosSerializados);
+        });
+    }, []);
+
+    if (registros[0] === undefined) {
+        return 'carregando...';
+    }
+
+    console.log(registros)
+
+
+
     return (
         <BodyHome>
             <Header>
@@ -14,17 +47,30 @@ export default function Home() {
                 icon
             </Header>
             <Registros>
-                Não há registros de entrada ou saída
+                {registros[0].map((registro, key) => {
+                    return (
+
+                        <ContainerRegistro>
+                            <RegistroDia> {registro.time} </RegistroDia>
+                            <div>
+                            <RegistroTexto> {registro.descricao} </RegistroTexto>
+                            </div>
+                            <RegistroPreço cor = {entrada ? '#03AC00' : "#C70000"}> R$ {registro.valor} </RegistroPreço>
+                        </ContainerRegistro>
+
+                    )
+                }
+                )}
             </Registros>
             <Footer>
                 <Link to={"/transferencia"}>
-                    <Buttons onClick={()=> setEntrada(true) }>
+                    <Buttons onClick={() => setEntrada(true)}>
                         icon
                         <p>Nova entrada</p>
                     </Buttons>
                 </Link>
                 <Link to={"/transferencia"}>
-                    <Buttons onClick={()=> setEntrada(false) } >
+                    <Buttons onClick={() => setEntrada(false)} >
                         icon
                         <p>Nova saída</p>
                     </Buttons>
@@ -59,6 +105,7 @@ margin-bottom: 22px;
 margin-top: 25px;
 `
 const Registros = styled.div`
+box-sizing: border-box;
 width: 326px;
 height: 446px;
 background: #FFFFFF;
@@ -69,9 +116,38 @@ font-size: 20px;
 line-height: 23px;
 color: #868686;
 border-radius: 5px;
+padding-left: 12px;
+padding-right: 12px;
+padding-top: 17px;
 display: flex;
-justify-content: center;
+flex-direction: column;
 align-items: center;
+`
+const ContainerRegistro = styled.div`
+width: 300px;
+height: 35px;
+margin-bottom: 4px;
+font-family: 'Raleway';
+font-style: normal;
+font-weight: 400;
+font-size: 16px;
+line-height: 19px;
+color: #000000;
+display: flex;
+justify-content: space-between;
+align-items: center;
+
+`
+const RegistroDia = styled.div`
+
+`
+const RegistroTexto = styled.div`
+width: 145px;
+
+
+`
+const RegistroPreço = styled.div`
+color: ${props => props.cor};
 `
 const Footer = styled.div`
 width: 326px;

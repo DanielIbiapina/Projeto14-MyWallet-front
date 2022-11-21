@@ -9,6 +9,7 @@ import { useState, useNavigate, useEffect } from "react";
 
 export default function App() {
     const [token, setToken] = useState(null);
+    const [corSelecionado, setCorSelecionado] = useState([]);
     const [entrada, setEntrada] = useState(true)
     const tokenOnLocalStorage = localStorage.getItem("token");
     const listaSerializada = localStorage.getItem("lista");
@@ -25,7 +26,7 @@ export default function App() {
 console.log(token)
 
     return(
-       <Contexto.Provider value={{token, setToken, setAndPersistToken, entrada, setEntrada}}>
+       <Contexto.Provider value={{token, setToken, setAndPersistToken, entrada, setEntrada, corSelecionado, setCorSelecionado}}>
         <BrowserRouter>
             <Routes>
             <Route path="/"  element= {<Home/>} />
@@ -39,3 +40,6 @@ console.log(token)
     );
     
 }
+
+//consertar array registros
+//baixar dayjs pra usar como id na hora de selecionar a cor
