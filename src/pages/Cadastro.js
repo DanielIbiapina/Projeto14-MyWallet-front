@@ -21,7 +21,7 @@ export default function Cadastro() {
       alert("As senhas estão diferentes");
       return;
     }
-    const requisicao = axios.post("http://localhost:5000/sign-up", {
+    const requisicao = axios.post(`${REACT_APP_API}/sign-up`, {
       name: nome,
       email: email,
       confirme: confirme,

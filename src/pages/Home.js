@@ -45,7 +45,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const promises = axios.get(`http://localhost:5000/meus-dados`, config);
+    const promises = axios.get(`${REACT_APP_API}/meus-dados`, config);
     promises.then((resposta) => {
       const dadoss = resposta.data;
       const dadosSerializadoss = JSON.stringify(dadoss);
@@ -53,7 +53,7 @@ export default function Home() {
       setPessoa(dadoss.name);
     });
 
-    const promise = axios.get(`http://localhost:5000/registros`);
+    const promise = axios.get(`${REACT_APP_API}/registros`);
     promise.then((resposta) => {
       const dados = resposta.data;
       const dadosSerializados = JSON.stringify(dados);

@@ -17,7 +17,7 @@ export default function Login() {
   function fazerLogin(event) {
     event.preventDefault();
     setLoading(true);
-    const requisicao = axios.post("http://localhost:5000/sign-in", {
+    const requisicao = axios.post(`${REACT_APP_API}/sign-in`, {
       email: email,
       password: senha,
     });

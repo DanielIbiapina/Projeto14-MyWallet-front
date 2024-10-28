@@ -28,7 +28,7 @@ export default function Transferencia() {
     setLoading(true);
 
     const requisicao = axios.post(
-      "http://localhost:5000/operacao",
+      `${REACT_APP_API}/operacao`,
       {
         valor: valor,
         descricao: descricao,
