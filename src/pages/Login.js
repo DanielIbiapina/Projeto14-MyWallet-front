@@ -14,30 +14,27 @@ export default function Login() {
   const { setAndPersistToken } = useContext(Contexto);
   const navigate = useNavigate();
 
-  function fazerLogin(event) {
+  async function fazerLogin(event) {
     event.preventDefault();
     setLoading(true);
-    const requisicao = axios.post(`${process.env.REACT_APP_API}/sign-in`, {
-      email: email,
-      password: senha,
-    });
-    requisicao.then((resposta) => {
-      setLoading(false);
-      console.log(`Bem-vindo ${resposta.data.name}, login foi um sucesso`);
-      //setLoginData(resposta.data)
-      setAndPersistToken(resposta.data.token);
-      const dados = resposta.data;
-      const dadosSerializados = JSON.stringify(dados);
-      localStorage.setItem("lista", dadosSerializados);
 
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API}/sign-in`,
+        {
+          email: email,
+          password: senha,
+        }
+      );
+
+      setAndPersistToken(response.data.token);
       navigate("/home");
-    });
-
-    requisicao.catch((erro) => {
-      alert("erro");
+    } catch (erro) {
+      alert("Email ou senha incorretos");
+      console.log(erro.response?.data || erro.message);
+    } finally {
       setLoading(false);
-      console.log(erro.response.data);
-    });
+    }
   }
 
   return (

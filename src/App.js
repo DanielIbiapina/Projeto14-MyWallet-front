@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Cadastro from "./pages/Cadastro";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -14,9 +14,14 @@ export default function App() {
   const listaSerializada = localStorage.getItem("lista");
   const lista = JSON.parse(listaSerializada);
 
-  function setAndPersistToken(token) {
-    setToken(token);
-    localStorage.setItem("token", token);
+  function setAndPersistToken(newToken) {
+    setToken(newToken);
+    localStorage.setItem("token", newToken);
+  }
+
+  function logout() {
+    setToken(null);
+    localStorage.removeItem("token");
   }
 
   return (
@@ -29,19 +34,29 @@ export default function App() {
         setEntrada,
         corSelecionado,
         setCorSelecionado,
+        logout,
       }}
     >
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/cadastro" element={<Cadastro />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/transferencia" element={<Transferencia />} />
+          <Route
+            path="/"
+            element={token ? <Navigate to="/home" /> : <Login />}
+          />
+          <Route
+            path="/cadastro"
+            element={token ? <Navigate to="/home" /> : <Cadastro />}
+          />
+          <Route
+            path="/home"
+            element={token ? <Home /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/transferencia"
+            element={token ? <Transferencia /> : <Navigate to="/" />}
+          />
         </Routes>
       </BrowserRouter>
     </Contexto.Provider>
   );
 }
-
-//consertar array registros
-//baixar dayjs pra usar como id na hora de selecionar a cor

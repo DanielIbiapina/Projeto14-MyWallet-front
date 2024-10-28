@@ -6,104 +6,90 @@ import axios from "axios";
 import { MdOutlineLogout } from "react-icons/md";
 
 export default function Home() {
-  const { entrada, setEntrada, corSelecionado, setCorSelecionado, token } =
-    useContext(Contexto);
-  const tokenOnLocalStorage = localStorage.getItem("token");
+  const { token, logout, setEntrada } = useContext(Contexto);
   const [registros, setRegistros] = useState([]);
   const [pessoa, setPessoa] = useState("");
-  let saldo = [];
-  let sum = 0;
   const [soma, setSoma] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  function atualizarRegistros(dadosSerializados) {
-    const lista = JSON.parse(dadosSerializados);
-
-    const novoArray = [...registros, lista];
-    setRegistros(novoArray);
-  }
-  function somarSaldo(dadosSerializados) {
-    const lista = JSON.parse(dadosSerializados);
-
-    lista.map((registro) => {
-      if (registro.positivo == "positivo") {
-        saldo.push(Number(registro.valor));
-      } else {
-        saldo.push(-1 * Number(registro.valor));
-      }
-    });
-
-    for (let i = 0; i < saldo.length; i++) {
-      sum = sum + saldo[i];
-    }
-    setSoma(sum);
+  function calcularSaldo(dados) {
+    const total = dados.reduce((acc, registro) => {
+      const valor = parseFloat(registro.valor);
+      return registro.tipo === "entrada" ? acc + valor : acc - valor;
+    }, 0);
+    setSoma(total.toFixed(2));
   }
 
-  const config = {
-    headers: {
-      Authorization: `Bearer ${tokenOnLocalStorage}`,
-    },
-  };
+  function handleLogout() {
+    logout();
+  }
 
   useEffect(() => {
-    const promises = axios.get(
-      `${process.env.REACT_APP_API}/meus-dados`,
-      config
+    if (!token) return;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios
+      .get(`${process.env.REACT_APP_API}/meus-dados`, config)
+      .then((res) => setPessoa(res.data.name))
+      .catch((err) => {
+        console.error(err);
+        alert("Erro ao carregar dados do usuário");
+      });
+
+    axios
+      .get(`${process.env.REACT_APP_API}/registros`, config)
+      .then((res) => {
+        setRegistros(res.data);
+        calcularSaldo(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Erro ao carregar registros");
+        setLoading(false);
+      });
+  }, [token, logout]);
+
+  if (loading) {
+    return (
+      <BodyHome>
+        <p style={{ color: "white" }}>Carregando...</p>
+      </BodyHome>
     );
-    promises.then((resposta) => {
-      const dadoss = resposta.data;
-      const dadosSerializadoss = JSON.stringify(dadoss);
-
-      setPessoa(dadoss.name);
-    });
-
-    const promise = axios.get(`${process.env.REACT_APP_API}/registros`, config);
-    promise.then((resposta) => {
-      const dados = resposta.data;
-      const dadosSerializados = JSON.stringify(dados);
-
-      atualizarRegistros(dadosSerializados);
-      somarSaldo(dadosSerializados);
-    });
-  }, []);
-
-  if (registros[0] === undefined) {
-    return "carregando...";
   }
 
   return (
     <BodyHome>
       <Header>
         <p>Olá, {pessoa}</p>
-        <Link to={"/"} style={{ color: "inherit", cursor: "pointer" }}>
-          <MdOutlineLogout />
-        </Link>
+        <MdOutlineLogout onClick={handleLogout} style={{ cursor: "pointer" }} />
       </Header>
       <Registros>
         <div>
-          {registros[0].length != 0
-            ? registros[0].map((registro, key) => {
-                return (
-                  <ContainerRegistro>
-                    <RegistroDia> {registro.time} </RegistroDia>
-                    <div>
-                      <RegistroTexto> {registro.descricao} </RegistroTexto>
-                    </div>
-                    <RegistroPreço
-                      cor={
-                        registro.positivo == "positivo" ? "#03AC00" : "#C70000"
-                      }
-                    >
-                      {" "}
-                      R$ {registro.valor}{" "}
-                    </RegistroPreço>
-                  </ContainerRegistro>
-                );
-              })
+          {registros.length > 0
+            ? registros.map((registro, key) => (
+                <ContainerRegistro key={key}>
+                  <RegistroDia>{registro.data}</RegistroDia>
+                  <div>
+                    <RegistroTexto>{registro.descricao}</RegistroTexto>
+                  </div>
+                  <RegistroPreço
+                    cor={registro.tipo === "entrada" ? "#03AC00" : "#C70000"}
+                  >
+                    R$ {parseFloat(registro.valor).toFixed(2)}
+                  </RegistroPreço>
+                </ContainerRegistro>
+              ))
             : "Não há registros de entrada ou saída"}
         </div>
-        <ContainerSaldo cor={soma > 0 ? "#03AC00" : "#C70000"}>
+        <ContainerSaldo cor={parseFloat(soma) > 0 ? "#03AC00" : "#C70000"}>
           <p>SALDO</p>
-          <h1>R${soma} </h1>
+          <h1>R$ {soma}</h1>
         </ContainerSaldo>
       </Registros>
       <Footer>
