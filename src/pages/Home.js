@@ -56,7 +56,7 @@ export default function Home() {
       setPessoa(dadoss.name);
     });
 
-    const promise = axios.get(`${process.env.REACT_APP_API}/registros`);
+    const promise = axios.get(`${process.env.REACT_APP_API}/registros`, config);
     promise.then((resposta) => {
       const dados = resposta.data;
       const dadosSerializados = JSON.stringify(dados);
