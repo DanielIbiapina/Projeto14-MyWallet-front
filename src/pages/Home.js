@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Contexto from "../Contexto.js";
 import axios from "axios";
 import { MdOutlineLogout } from "react-icons/md";
+import dayjs from "dayjs";
 
 export default function Home() {
   const { token, logout, setEntrada } = useContext(Contexto);
@@ -15,7 +16,7 @@ export default function Home() {
   function calcularSaldo(dados) {
     const total = dados.reduce((acc, registro) => {
       const valor = parseFloat(registro.valor);
-      return registro.tipo === "entrada" ? acc + valor : acc - valor;
+      return registro.positivo === "positivo" ? acc + valor : acc - valor;
     }, 0);
     setSoma(total.toFixed(2));
   }
@@ -44,8 +45,12 @@ export default function Home() {
     axios
       .get(`${process.env.REACT_APP_API}/registros`, config)
       .then((res) => {
-        setRegistros(res.data);
-        calcularSaldo(res.data);
+        const registrosFormatados = res.data.map((registro) => ({
+          ...registro,
+          data: dayjs(registro.data).format("DD/MM"),
+        }));
+        setRegistros(registrosFormatados);
+        calcularSaldo(registrosFormatados);
         setLoading(false);
       })
       .catch((err) => {
@@ -72,16 +77,18 @@ export default function Home() {
       <Registros>
         <div>
           {registros.length > 0
-            ? registros.map((registro, key) => (
-                <ContainerRegistro key={key}>
-                  <RegistroDia>{registro.data}</RegistroDia>
-                  <div>
+            ? registros.map((registro, index) => (
+                <ContainerRegistro key={index}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <RegistroDia>{registro.data}</RegistroDia>
                     <RegistroTexto>{registro.descricao}</RegistroTexto>
                   </div>
                   <RegistroPreço
-                    cor={registro.tipo === "entrada" ? "#03AC00" : "#C70000"}
+                    cor={
+                      registro.positivo === "positivo" ? "#03AC00" : "#C70000"
+                    }
                   >
-                    R$ {parseFloat(registro.valor).toFixed(2)}
+                    {Number(registro.valor).toFixed(2)}
                   </RegistroPreço>
                 </ContainerRegistro>
               ))
@@ -190,6 +197,7 @@ const ContainerSaldo = styled.div`
 `;
 const RegistroDia = styled.div`
   color: #c6c6c6;
+  margin-right: 10px;
 `;
 const RegistroTexto = styled.div`
   width: 145px;

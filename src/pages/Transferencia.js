@@ -11,47 +11,45 @@ export default function Transferencia() {
   const [valor, setValor] = useState("");
   const [descricao, setDescricao] = useState("");
   const [loading, setLoading] = useState(false);
-  const { entrada, setEntrada, corSelecionado, setCorSelecionado, token } =
-    useContext(Contexto);
-  const tokenOnLocalStorage = localStorage.getItem("token");
-
-  const config = {
-    headers: {
-      Authorization: `Bearer ${tokenOnLocalStorage}`,
-    },
-  };
-
+  const { entrada, token } = useContext(Contexto);
   const navigate = useNavigate();
 
   function fazerTransferencia(event) {
     event.preventDefault();
     setLoading(true);
 
-    const requisicao = axios.post(
-      `${process.env.REACT_APP_API}/operacao`,
-      {
-        valor: valor,
-        descricao: descricao,
-        positivo: entrada ? "positivo" : "negativo",
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-      config
-    );
+    };
 
-    requisicao.then((resposta) => {
-      setLoading(false);
-      //setLoginData(resposta.data)
-      const dados = resposta.data;
-      const dadosSerializados = JSON.stringify(dados);
-      localStorage.setItem("listavalor", dadosSerializados);
+    const valorNumerico = Number(valor).toFixed(2);
 
-      navigate("/home");
-    });
+    const body = {
+      valor: valorNumerico,
+      descricao: descricao,
+      positivo: entrada ? "positivo" : "negativo",
+      data: dayjs().format("DD/MM"),
+    };
 
-    requisicao.catch((erro) => {
-      alert("erro");
-      setLoading(false);
-      console.log(erro.response.data);
-    });
+    console.log("Dados sendo enviados:", body);
+
+    axios
+      .post(`${process.env.REACT_APP_API}/operacao`, body, config)
+      .then((res) => {
+        setLoading(false);
+        navigate("/home");
+      })
+      .catch((erro) => {
+        console.error("Erro completo:", erro);
+        setLoading(false);
+        if (erro.response) {
+          alert(erro.response.data);
+        } else {
+          alert("Erro ao conectar com o servidor");
+        }
+      });
   }
 
   return (
@@ -59,25 +57,26 @@ export default function Transferencia() {
       <Header>{entrada ? <p>Nova entrada</p> : <p>Nova saída</p>}</Header>
       <Form onSubmit={fazerTransferencia}>
         <Input
-          type="text"
-          placeholder="  Valor"
+          type="number"
+          placeholder="Valor"
           value={valor}
           onChange={(e) => setValor(e.target.value)}
+          required
         />
         <Input
           type="text"
-          placeholder="  Descrição"
+          placeholder="Descrição"
           value={descricao}
           onChange={(e) => setDescricao(e.target.value)}
+          required
         />
         {loading ? (
-          <BotaoSalvar type="submit">
+          <BotaoSalvar disabled>
             <Oval
               height={40}
               width={40}
               color="#FFFFFF"
               wrapperStyle={{}}
-              wrapperClass=""
               visible={true}
               ariaLabel="oval-loading"
               secondaryColor="#4fa94d"
@@ -85,10 +84,10 @@ export default function Transferencia() {
               strokeWidthSecondary={2}
             />
           </BotaoSalvar>
-        ) : entrada ? (
-          <BotaoSalvar type="submit">Salvar entrada</BotaoSalvar>
         ) : (
-          <BotaoSalvar type="submit">Salvar saída</BotaoSalvar>
+          <BotaoSalvar type="submit">
+            {entrada ? "Salvar entrada" : "Salvar saída"}
+          </BotaoSalvar>
         )}
       </Form>
     </BodyTransferencia>
